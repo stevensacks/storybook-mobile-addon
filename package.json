@@ -20,10 +20,7 @@
     "url": "https://github.com/stevensacks/storybook-mobile-addon"
   },
   "license": "MIT",
-  "authors": [
-    "Steven Sacks",
-    "Alex Holachek"
-  ],
+  "author": "Steven Sacks<stevensacks@gmail.com>",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "types": "dist/ts/index.d.ts",
