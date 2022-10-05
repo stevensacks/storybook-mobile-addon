@@ -4,7 +4,7 @@
   "description": "This addon offers suggestions on how you can improve the HTML, CSS and UX of your components to be more mobile-friendly.",
   "keywords": [
     "storybook",
-    "storybook-addons",
+    "storybook-addons", "mobile", "ux", "responsive", "responsive design", "audit", "storybook-addons",
     "mobile",
     "ux",
     "responsive",
