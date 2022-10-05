@@ -1,16 +1,29 @@
 {
-  "name": "storybook-addon-kit",
-  "version": "0.0.0",
-  "description": "everything you need to build a Storybook addon",
+  "name": "storybook-mobile-addon",
+  "version": "1.0.0",
+  "description": "This addon offers suggestions on how you can improve the HTML, CSS and UX of your components to be more mobile-friendly.",
   "keywords": [
-    "storybook-addons"
+    "storybook",
+    "storybook-addons",
+    "mobile",
+    "ux",
+    "responsive",
+    "responsive design",
+    "audit"
   ],
+  "homepage": "https://github.com/stevensacks/storybook-mobile-addon#readme",
+  "bugs": {
+    "url": "https://github.com/stevensacks/storybook-mobile-addon/issues"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/storybookjs/storybook-addon-kit"
+    "url": "https://github.com/stevensacks/storybook-mobile-addon"
   },
-  "author": "package-author",
   "license": "MIT",
+  "authors": [
+    "Steven Sacks",
+    "Alex Holachek"
+  ],
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "types": "dist/ts/index.d.ts",
@@ -21,7 +34,6 @@
     "*.d.ts"
   ],
   "scripts": {
-    "postinstall": "node scripts/welcome.js",
     "clean": "rimraf ./dist",
     "buildBabel": "concurrently \"yarn buildBabel:cjs\" \"yarn buildBabel:esm\"",
     "buildBabel:cjs": "babel ./src -d ./dist/cjs --extensions \".js,.jsx,.ts,.tsx\"",
@@ -39,34 +51,75 @@
     "eject-ts": "zx scripts/eject-typescript.mjs"
   },
   "devDependencies": {
-    "@babel/cli": "^7.12.1",
-    "@babel/core": "^7.12.3",
-    "@babel/preset-env": "^7.12.1",
-    "@babel/preset-react": "^7.12.5",
-    "@babel/preset-typescript": "^7.13.0",
-    "@storybook/addon-essentials": "^6.5.8",
-    "@storybook/react": "^6.5.8",
-    "auto": "^10.3.0",
-    "babel-loader": "^8.1.0",
-    "boxen": "^5.0.1",
-    "concurrently": "^6.2.0",
-    "dedent": "^0.7.0",
-    "prettier": "^2.3.1",
-    "prop-types": "^15.7.2",
-    "react": "^17.0.1",
-    "react-dom": "^17.0.1",
-    "rimraf": "^3.0.2",
-    "typescript": "^4.2.4",
-    "zx": "^1.14.1"
+    "@babel/cli": "7.19.3",
+    "@babel/core": "7.19.3",
+    "@babel/preset-env": "7.19.3",
+    "@babel/preset-react": "7.18.6",
+    "@babel/preset-typescript": "7.18.6",
+    "@commitlint/cli": "17.1.2",
+    "@commitlint/config-conventional": "17.1.0",
+    "@storybook/addon-essentials": "6.5.12",
+    "@storybook/addons": "6.5.12",
+    "@storybook/api": "6.5.12",
+    "@storybook/components": "6.5.12",
+    "@storybook/core-events": "6.5.12",
+    "@storybook/react": "6.5.12",
+    "@storybook/theming": "6.5.12",
+    "@types/react": "18.0.21",
+    "@types/react-dom": "18.0.6",
+    "@types/spark-md5": "^3.0.2",
+    "@typescript-eslint/eslint-plugin": "5.39.0",
+    "@typescript-eslint/parser": "5.39.0",
+    "auto": "10.37.6",
+    "babel-loader": "8.2.5",
+    "boxen": "5.1.2",
+    "concurrently": "6.5.1",
+    "cz-conventional-changelog": "3.3.0",
+    "dedent": "0.7.0",
+    "eslint": "8.24.0",
+    "eslint-config-airbnb": "19.0.4",
+    "eslint-config-airbnb-typescript": "17.0.0",
+    "eslint-config-prettier": "8.5.0",
+    "eslint-plugin-eslint-comments": "3.2.0",
+    "eslint-plugin-import": "2.26.0",
+    "eslint-plugin-jsx-a11y": "6.6.1",
+    "eslint-plugin-no-switch-statements": "1.0.0",
+    "eslint-plugin-prefer-arrow": "1.2.3",
+    "eslint-plugin-prettier": "4.2.1",
+    "eslint-plugin-react": "7.31.8",
+    "eslint-plugin-react-hooks": "4.6.0",
+    "eslint-plugin-simple-import-sort": "8.0.0",
+    "eslint-plugin-sonarjs": "0.15.0",
+    "eslint-plugin-sort-destructure-keys": "1.4.0",
+    "eslint-plugin-sort-keys-fix": "1.1.2",
+    "eslint-plugin-sort-react-dependency-arrays": "0.2.0",
+    "eslint-plugin-storybook": "0.6.4",
+    "eslint-plugin-typescript-sort-keys": "2.1.0",
+    "eslint-plugin-unicorn": "44.0.1",
+    "eslint-plugin-you-dont-need-lodash-underscore": "6.12.0",
+    "evergreen-ui": "^6.10.4",
+    "husky": "8.0.1",
+    "lint-staged": "13.0.3",
+    "prettier": "2.7.1",
+    "prop-types": "15.8.1",
+    "react": "17.0.2",
+    "react-dom": "17.0.2",
+    "rimraf": "3.0.2",
+    "styled-components": "5.3.6",
+    "typescript": "4.7.3",
+    "zx": "1.14.1"
   },
   "peerDependencies": {
-    "@storybook/addons": "^6.5.8",
-    "@storybook/api": "^6.5.8",
-    "@storybook/components": "^6.5.8",
-    "@storybook/core-events": "^6.5.8",
-    "@storybook/theming": "^6.5.8",
-    "react": "^16.8.0 || ^17.0.0",
+    "@storybook/addons": ">=6.5.0",
+    "@storybook/api": ">=6.5.0",
+    "@storybook/components": ">=6.5.0",
+    "@storybook/core-events": ">=6.5.0",
+    "@storybook/theming": ">=6.5.0",
+    "react": "^16.8.0 || ^17.0.0 || ^18.0.0",
     "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0"
+  },
+  "dependencies": {
+    "lrt": "3.1.1"
   },
   "peerDependenciesMeta": {
     "react": {
@@ -80,10 +133,7 @@
     "access": "public"
   },
   "storybook": {
-    "displayName": "Addon Kit",
-    "supportedFrameworks": [
-      "supported-frameworks"
-    ],
-    "icon": "https://user-images.githubusercontent.com/321738/63501763-88dbf600-c4cc-11e9-96cd-94adadc2fd72.png"
+    "displayName": "Storybook Mobile UX Hints",
+    "icon": "https://user-images.githubusercontent.com/263385/101992264-ee369600-3c7f-11eb-8e9f-876d8b5ddff9.png"
   }
 }
