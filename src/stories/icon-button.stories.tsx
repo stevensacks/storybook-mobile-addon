@@ -1,6 +1,6 @@
 import React from 'react';
 import {InfoSignIcon} from 'evergreen-ui';
-import styled from 'styled-components';
+import {styled} from '@storybook/theming';
 
 const InvisibleButton = styled.button`
     font-family: inherit;
