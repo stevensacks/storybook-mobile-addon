@@ -4,7 +4,7 @@
 
 This addon offers suggestions on how you can improve the HTML, CSS and UX of your components to be more mobile-friendly.
 
-This is a rewrite of Alex Holachek's original [storybook-mobile](https://github.com/aholachek/storybook-mobile) addon to make it compatible with the more recent versions of Storybook.
+This is a rewrite of Alex Holachek's original [storybook-mobile](https://github.com/aholachek/storybook-mobile) addon to make it compatible with Storybook 7.
 
 <a href="https://storybook-mobile.netlify.app/?path=/story/signup-form--default" alt="screenshot of storybook-mobile addon">
     <img src="./screenshot.png" width="600px">
@@ -34,9 +34,3 @@ This addon works best along with the [@storybook/addon-viewport](https://github.
 ## Contributing
 
 If you have any suggestions or find any bugs, please make an issue or a pr!
-
-**NOTE**: While developing this addon locally, if you are using npm <v7, you'll need to manually install `peerDependencies` like so:
-
-```bash
-npm install --no-save react react-dom
-```
