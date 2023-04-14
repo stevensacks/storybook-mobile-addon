@@ -21,3 +21,4 @@ const Panel: FC<PanelProps> = ({active, panelKey}) => (
 );
 
 export default Panel;
+

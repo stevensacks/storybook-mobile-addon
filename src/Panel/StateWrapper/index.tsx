@@ -1,5 +1,5 @@
 import {cloneElement, FC, ReactElement, useState} from 'react';
-import {useChannel} from '@storybook/api';
+import {useChannel} from '@storybook/manager-api';
 import {STORY_RENDERED} from '@storybook/core-events';
 
 type StateWrapperProps = {
