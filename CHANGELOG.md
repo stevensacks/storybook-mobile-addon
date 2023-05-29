@@ -1,3 +1,15 @@
+# v2.0.2 (Mon May 29 2023)
+
+#### ⚠️ Pushed to `main`
+
+- update deps ([@stevensacks](https://github.com/stevensacks))
+
+#### Authors: 1
+
+- Steven Sacks ([@stevensacks](https://github.com/stevensacks))
+
+---
+
 # v1.0.3 (Fri Apr 14 2023)
 
 #### 🐛 Bug Fix
