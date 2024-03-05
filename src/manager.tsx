@@ -7,9 +7,7 @@ addons.register(ADDON_ID, () => {
     addons.add(PANEL_ID, {
         match: ({viewMode}) => !!viewMode?.match(/^story$/),
         paramKey: PARAM_KEY,
-        render: ({active, key}) => (
-            <Panel key={key} active={active} panelKey={key} />
-        ),
+        render: ({active}) => <Panel active={active} />,
         title: 'Mobile',
         type: types.PANEL,
     });

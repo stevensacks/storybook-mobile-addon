@@ -6,19 +6,17 @@ import ViewportManager from './ViewportManager';
 
 type PanelProps = {
     active: boolean;
-    panelKey: string;
 };
 
-const Panel: FC<PanelProps> = ({active, panelKey}) => (
+const Panel: FC<PanelProps> = ({active}) => (
     <Fragment key="storybook-mobile-addon">
         <ViewportManager active={active} />
-        <AddonPanel key={panelKey} active={active}>
+        <AddonPanel active={active}>
             <StateWrapper>
-                <Content key={panelKey} active={active} />
+                <Content active={active} />
             </StateWrapper>
         </AddonPanel>
     </Fragment>
 );
 
 export default Panel;
-
