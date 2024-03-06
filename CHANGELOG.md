@@ -1,3 +1,15 @@
+# v2.0.3 (Wed Mar 06 2024)
+
+#### 🐛 Bug Fix
+
+- feat: storybook 8 [#3](https://github.com/stevensacks/storybook-mobile-addon/pull/3) ([@stevensacks](https://github.com/stevensacks))
+
+#### Authors: 1
+
+- Steven Sacks ([@stevensacks](https://github.com/stevensacks))
+
+---
+
 # v2.0.2 (Mon May 29 2023)
 
 #### ⚠️ Pushed to `main`
