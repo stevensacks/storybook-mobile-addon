@@ -17,6 +17,7 @@ const InvisibleButton = styled.button`
 
 const IconButton = () => (
     <InvisibleButton>
+        {/* @ts-ignore */}
         <InfoSignIcon color="info" />
     </InvisibleButton>
 );
