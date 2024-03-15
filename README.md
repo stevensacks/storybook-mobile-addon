@@ -1,8 +1,5 @@
 # 📱storybook-mobile-addon
 
-- 2.x Requires storybook `>=7.0.0`
-- 3.x Requires storybook `>=8.0.0`
-
 This addon offers suggestions on how you can improve the HTML, CSS and UX of your components to be more mobile-friendly.
 
 <a href="https://storybook-mobile.netlify.app/?path=/story/signup-form--default" alt="screenshot of storybook-mobile addon">
@@ -10,6 +7,11 @@ This addon offers suggestions on how you can improve the HTML, CSS and UX of you
 </a>
 
 [To see all available suggestions, check out a live storybook demo here.](https://storybook-mobile.netlify.app/?path=/story/signup-form--default)
+
+## Versions
+
+- 2.x is for Storybook `>=7.0.0`
+- 3.x is for Storybook `>=8.0.0`
 
 ## Quick Start
 
