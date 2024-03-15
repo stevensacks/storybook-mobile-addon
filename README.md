@@ -1,10 +1,9 @@
 # 📱storybook-mobile-addon
 
-[![npm version](https://badge.fury.io/js/storybook-mobile.svg)](https://badge.fury.io/js/storybook-mobile)
+- 2.x Requires storybook `>=7.0.0`
+- 3.x Requires storybook `>=8.0.0`
 
 This addon offers suggestions on how you can improve the HTML, CSS and UX of your components to be more mobile-friendly.
-
-This is a rewrite of Alex Holachek's original [storybook-mobile](https://github.com/aholachek/storybook-mobile) addon to make it compatible with Storybook 7.
 
 <a href="https://storybook-mobile.netlify.app/?path=/story/signup-form--default" alt="screenshot of storybook-mobile addon">
     <img src="./screenshot.png" width="600px">
