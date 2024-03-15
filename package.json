@@ -99,5 +99,6 @@
   "storybook": {
     "displayName": "Storybook Mobile UX Hints",
     "icon": "https://user-images.githubusercontent.com/263385/101992264-ee369600-3c7f-11eb-8e9f-876d8b5ddff9.png"
-  }
+  },
+  "packageManager": "yarn@1.22.19+sha256.732620bac8b1690d507274f025f3c6cfdc3627a84d9642e38a07452cc00e0f2e"
 }
