@@ -10,12 +10,14 @@ This addon offers suggestions on how you can improve the HTML, CSS and UX of you
 
 ## Versions
 
+- 3.1.x is for Storybook `>=8.2.0`
+- 3.0.x is for Storybook `>=8.0.0`
 - 2.x is for Storybook `>=7.0.0`
-- 3.x is for Storybook `>=8.0.0`
+
 
 ## Quick Start
 
-`yarn add -D storybook-mobile-addon` or `npm install --save-dev storybook-mobile-addon`
+`npm install --save-dev storybook-mobile-addon`
 
 Next, add `storybook-mobile-addon` to your list of addons:
 
@@ -30,7 +32,7 @@ module.exports = {
 }
 ```
 
-This addon works best along with the [@storybook/addon-viewport](https://github.com/storybookjs/storybook/tree/next/addons/viewport) addon, so please install that as well if you don't have it already.
+This addon works best when you set mobile-sized [viewports](https://storybook.js.org/docs/essentials/viewport) in your `preview.ts`.
 
 ## Contributing
 
