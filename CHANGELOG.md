@@ -1,3 +1,17 @@
+# v3.0.2 (Tue Jul 30 2024)
+
+#### ⚠️ Pushed to `main`
+
+- ci: update release script to use node 18 and npm ([@stevensacks](https://github.com/stevensacks))
+- feat: add support for storybook 8.2.x ([@stevensacks](https://github.com/stevensacks))
+- docs: update README versions ([@stevensacks](https://github.com/stevensacks))
+
+#### Authors: 1
+
+- Steven Sacks ([@stevensacks](https://github.com/stevensacks))
+
+---
+
 # v2.1.3 (Fri Mar 15 2024)
 
 #### ⚠️ Pushed to `main`
