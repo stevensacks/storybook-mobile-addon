@@ -1,3 +1,16 @@
+# v3.1.2 (Sun May 04 2025)
+
+#### ⚠️ Pushed to `main`
+
+- feat: add storybook 9 support ([@stevensacks](https://github.com/stevensacks))
+- chore: fix package url ([@stevensacks](https://github.com/stevensacks))
+
+#### Authors: 1
+
+- Steven Sacks ([@stevensacks](https://github.com/stevensacks))
+
+---
+
 # v3.0.2 (Tue Jul 30 2024)
 
 #### ⚠️ Pushed to `main`
