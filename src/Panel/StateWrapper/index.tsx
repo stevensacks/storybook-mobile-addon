@@ -1,6 +1,6 @@
 import {cloneElement, FC, ReactElement, useState} from 'react';
-import {useChannel} from '@storybook/manager-api';
-import {STORY_RENDERED} from '@storybook/core-events';
+import {useChannel} from 'storybook/manager-api';
+import {STORY_RENDERED} from 'storybook/internal/core-events';
 
 type StateWrapperProps = {
     children: ReactElement;
@@ -15,9 +15,7 @@ const StateWrapper: FC<StateWrapperProps> = ({children}) => {
         },
     });
 
-    return cloneElement(children, {
-        storyId,
-    });
+    return cloneElement(children, {storyId});
 };
 
 export default StateWrapper;

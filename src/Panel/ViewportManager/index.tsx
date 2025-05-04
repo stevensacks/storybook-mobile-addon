@@ -1,5 +1,5 @@
 import {FC, useEffect, useRef} from 'react';
-import {useAddonState} from '@storybook/manager-api';
+import {useAddonState} from 'storybook/manager-api';
 import {DEFAULT_VIEWPORT, NO_VIEWPORT, VIEWPORT_ID} from '../../constants';
 
 type ViewportManagerProps = {

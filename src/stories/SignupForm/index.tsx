@@ -1,6 +1,6 @@
 import React from 'react';
 import {Button, Heading, Text, TextInputField} from 'evergreen-ui';
-import {styled} from '@storybook/theming';
+import {styled} from 'storybook/theming';
 import background from './background.jpg';
 
 const Container = styled.div`

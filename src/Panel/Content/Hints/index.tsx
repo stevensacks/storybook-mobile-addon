@@ -1,6 +1,6 @@
 /* eslint-disable react/no-array-index-key */
 import React, {FC, useEffect, useMemo, useState} from 'react';
-import {styled} from '@storybook/theming';
+import {styled} from 'storybook/theming';
 import {
     ActiveWarning,
     AutoCompleteWarning,
@@ -817,13 +817,13 @@ const Hints: FC<HintsProps> = ({container}) => {
                                 .reduce(
                                     (acc2, current2) =>
                                         acc2 + Number(current2.length > 0),
-                                    0
+                                    0,
                                 );
 
                       return acc + count;
                   }, 0)
                 : 0,
-        [warnings]
+        [warnings],
     );
 
     // Before counting, show the Loading state

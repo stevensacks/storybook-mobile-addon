@@ -1,6 +1,6 @@
 /* eslint-disable react/no-array-index-key */
 import React from 'react';
-import {styled} from '@storybook/theming';
+import {styled} from 'storybook/theming';
 import fish1 from './assets/fish-1.jpg';
 import fish2 from './assets/fish-2.jpg';
 import fish3 from './assets/fish-3.jpg';

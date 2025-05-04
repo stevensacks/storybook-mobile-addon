@@ -1,5 +1,5 @@
 import React, {FC, Fragment} from 'react';
-import {AddonPanel} from '@storybook/components';
+import {AddonPanel} from 'storybook/internal/components';
 import Content from './Content';
 import StateWrapper from './StateWrapper';
 import ViewportManager from './ViewportManager';
