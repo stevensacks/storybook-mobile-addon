@@ -50,29 +50,29 @@
     "lrt": "^3.1.1"
   },
   "devDependencies": {
-    "@storybook/react-vite": "^9.0.0-beta.10",
-    "@types/node": "22.10.7",
-    "@types/react": "19.0.7",
-    "@types/react-dom": "19.0.3",
-    "@vitejs/plugin-react": "4.3.4",
-    "auto": "11.2.0",
-    "boxen": "^7.1.1",
+    "@storybook/react-vite": "^9.0.0",
+    "@types/node": "22.15.24",
+    "@types/react": "19.1.6",
+    "@types/react-dom": "19.1.5",
+    "@vitejs/plugin-react": "4.5.0",
+    "auto": "11.3.0",
+    "boxen": "8.0.1",
     "dedent": "^1.5.3",
     "evergreen-ui": "6.10.5",
-    "npm-run-all2": "^6.2.3",
-    "prettier": "3.3.3",
+    "npm-run-all2": "8.0.4",
+    "prettier": "3.5.3",
     "prompts": "^2.4.2",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "rimraf": "^5.0.5",
-    "storybook": "^9.0.0-beta.10",
+    "rimraf": "6.0.1",
+    "storybook": "^9.0.0",
     "tsup": "^8.2.4",
     "typescript": "^5.5.4",
-    "vite": "^5.3.5",
-    "zx": "^7.2.3"
+    "vite": "6.3.5",
+    "zx": "8.5.4"
   },
   "peerDependencies": {
-    "storybook": "^9.0.0-beta.10"
+    "storybook": "^9.0.0"
   },
   "publishConfig": {
     "access": "public"
@@ -88,6 +88,5 @@
   "storybook": {
     "displayName": "Storybook Mobile UX Hints",
     "icon": "https://user-images.githubusercontent.com/263385/101992264-ee369600-3c7f-11eb-8e9f-876d8b5ddff9.png"
-  },
-  "packageManager": "yarn@1.22.19+sha256.732620bac8b1690d507274f025f3c6cfdc3627a84d9642e38a07452cc00e0f2e"
+  }
 }
