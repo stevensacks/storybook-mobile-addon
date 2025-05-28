@@ -1,3 +1,15 @@
+# v4.0.2 (Thu May 29 2025)
+
+#### ⚠️ Pushed to `main`
+
+- feat: storybook 9 release ([@stevensacks](https://github.com/stevensacks))
+
+#### Authors: 1
+
+- Steven Sacks ([@stevensacks](https://github.com/stevensacks))
+
+---
+
 # v3.1.2 (Sun May 04 2025)
 
 #### ⚠️ Pushed to `main`
