@@ -1,6 +1,6 @@
 {
   "name": "storybook-mobile-addon",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "description": "This addon offers suggestions on how you can improve the HTML, CSS and UX of your components to be more mobile-friendly.",
   "keywords": [
     "storybook",
