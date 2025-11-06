@@ -10,6 +10,7 @@ This addon offers suggestions on how you can improve the HTML, CSS and UX of you
 
 ## Versions
 
+- 10.x.x is for Storybook `>=10.0.0`
 - 4.x.x is for Storybook `>=9.0.0`
 - 3.1.x is for Storybook `>=8.2.0`
 - 3.0.x is for Storybook `>=8.0.0`

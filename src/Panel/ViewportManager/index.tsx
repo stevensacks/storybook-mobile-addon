@@ -1,4 +1,5 @@
-import {FC, useEffect, useRef} from 'react';
+import {useEffect, useRef} from 'react';
+import type {FC} from 'react';
 import {useAddonState} from 'storybook/manager-api';
 import {DEFAULT_VIEWPORT, NO_VIEWPORT, VIEWPORT_ID} from '../../constants';
 
@@ -8,7 +9,7 @@ type ViewportManagerProps = {
 
 const ViewportManager: FC<ViewportManagerProps> = ({active}) => {
     const [viewportState, setViewportState] = useAddonState(VIEWPORT_ID);
-    const cachedState = useRef(null);
+    const cachedState = useRef<string | null>(null);
 
     useEffect(() => {
         if (cachedState.current && !active) {

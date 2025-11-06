@@ -1,8 +1,8 @@
 /* eslint-disable no-plusplus */
-import {Dispatch, SetStateAction} from 'react';
+import type {Dispatch, SetStateAction} from 'react';
 import {createScheduler} from 'lrt';
 import getDomPath from './get-dom-path';
-import {
+import type {
     Analysis,
     DangerZone,
     HTMLElementWithStyleSheets,
@@ -18,12 +18,14 @@ const getElements = (container: HTMLElementWithStyleSheets, tag: string) =>
 
 const getStylesheetRules = (
     sheets: Record<string, CSSStyleSheet>,
-    k: string
+    k: string,
 ) => {
     let rules: CSSRule[] = [];
 
     try {
-        rules = Array.from(sheets[k].cssRules);
+        if (sheets[k]?.cssRules) {
+            rules = Array.from(sheets[k].cssRules);
+        }
     } catch {
         //
     }
@@ -35,19 +37,19 @@ const getNodeName = (element: Element) =>
     element.nodeName === 'A'
         ? 'a'
         : element.nodeName === 'BUTTON'
-        ? 'button'
-        : `${element.nodeName.toLowerCase()}[role="button"]`;
+          ? 'button'
+          : `${element.nodeName.toLowerCase()}[role="button"]`;
 
 const attachLabels = (
     inputs: HTMLInputElement[],
-    container: HTMLElementWithStyleSheets
+    container: HTMLElementWithStyleSheets,
 ) =>
     inputs.map((input) => {
         let labelText = '';
 
         if (input.labels && input.labels[0]) {
             labelText = input.labels[0].textContent;
-        } else if (input.parentElement.nodeName === 'LABEL') {
+        } else if (input.parentElement?.nodeName === 'LABEL') {
             labelText = input.parentElement.textContent;
         } else if (input.id) {
             const label = container.querySelector(`label[for="${input.id}"]`);
@@ -77,7 +79,7 @@ const getAutocompleteWarnings = (container: HTMLElementWithStyleSheets) => {
         const currentType = input.getAttribute('type');
         const autocomplete = input.getAttribute('autocomplete');
 
-        return textInputs[currentType] && !autocomplete;
+        return currentType && textInputs[currentType] && !autocomplete;
     }) as HTMLInputElement[];
 
     return attachLabels(warnings, container);
@@ -86,7 +88,7 @@ const getAutocompleteWarnings = (container: HTMLElementWithStyleSheets) => {
 const getInputTypeNumberWarnings = (container: HTMLElementWithStyleSheets) => {
     const inputs = getElements(
         container,
-        'input[type="number"]'
+        'input[type="number"]',
     ) as HTMLInputElement[];
 
     return attachLabels(inputs, container);
@@ -96,14 +98,14 @@ const getInputTypeWarnings = (container: HTMLElementWithStyleSheets) => {
     const inputs = getElements(container, 'input[type="text"]')
         .concat(getElements(container, 'input:not([type])'))
         .filter(
-            (input) => !input.getAttribute('inputmode')
+            (input) => !input.getAttribute('inputmode'),
         ) as HTMLInputElement[];
 
     return attachLabels(inputs, container);
 };
 
 export const getInstantWarnings = (
-    container: HTMLElementWithStyleSheets
+    container: HTMLElementWithStyleSheets,
 ): Warnings => ({
     autocomplete: getAutocompleteWarnings(container),
     inputType: getInputTypeWarnings(container),
@@ -133,8 +135,8 @@ const toTouchTarget = ({
         el.nodeName === 'A'
             ? 'a'
             : el.nodeName === 'BUTTON'
-            ? 'button'
-            : `${el.nodeName.toLowerCase()}[role="button"]`,
+              ? 'button'
+              : `${el.nodeName.toLowerCase()}[role="button"]`,
     width: Math.floor(width),
 });
 
@@ -155,7 +157,7 @@ function* getTouchTargetSizeWarning(container: HTMLElementWithStyleSheets) {
         (element): SuspectElementTuple => [
             element,
             element.getBoundingClientRect(),
-        ]
+        ],
     );
 
     const {length} = elements;
@@ -164,32 +166,38 @@ function* getTouchTargetSizeWarning(container: HTMLElementWithStyleSheets) {
 
     for (let index = 0; index < length; index++) {
         const element = elements[index];
-        const bounding = element.getBoundingClientRect();
+        if (element) {
+            const bounding = element.getBoundingClientRect();
 
-        const dangerZone = {
-            bottom: bounding.bottom + RECOMMENDED_DISTANCE,
-            left: bounding.left - RECOMMENDED_DISTANCE,
-            right: bounding.right + RECOMMENDED_DISTANCE,
-            top: bounding.top - RECOMMENDED_DISTANCE,
-        };
+            const dangerZone = {
+                bottom: bounding.bottom + RECOMMENDED_DISTANCE,
+                left: bounding.left - RECOMMENDED_DISTANCE,
+                right: bounding.right + RECOMMENDED_DISTANCE,
+                top: bounding.top - RECOMMENDED_DISTANCE,
+            };
 
-        const close = suspectElements.filter(
-            ([susElement, susBounding]) =>
-                susElement !== element &&
-                isInside(dangerZone, susBounding as DOMRect)
-        );
+            const close = suspectElements.filter(
+                ([susElement, susBounding]) =>
+                    susElement !== element &&
+                    isInside(dangerZone, susBounding as DOMRect),
+            );
 
-        const isUnderMinSize = checkMinSize(bounding);
+            const isUnderMinSize = checkMinSize(bounding);
 
-        if (isUnderMinSize || close.length > 0) {
-            const touchTarget = toTouchTarget({bounding, close, el: element});
+            if (isUnderMinSize || close.length > 0) {
+                const touchTarget = toTouchTarget({
+                    bounding,
+                    close,
+                    el: element,
+                });
 
-            if (isUnderMinSize) {
-                underMinSize.push(touchTarget);
-            }
+                if (isUnderMinSize) {
+                    underMinSize.push(touchTarget);
+                }
 
-            if (close.length > 0) {
-                tooClose.push(touchTarget);
+                if (close.length > 0) {
+                    tooClose.push(touchTarget);
+                }
             }
         }
         yield index;
@@ -200,7 +208,7 @@ function* getTouchTargetSizeWarning(container: HTMLElementWithStyleSheets) {
 
 function* getTapHighlightWarnings(container: HTMLElementWithStyleSheets) {
     const buttons = getElements(container, 'button').concat(
-        getElements(container, '[role="button"]')
+        getElements(container, '[role="button"]'),
     );
     const links = getElements(container, 'a');
     const elements = buttons.concat(links);
@@ -281,7 +289,7 @@ function* getBackgroundImageWarnings(container: HTMLElementWithStyleSheets) {
                 // to get a better idea of the size of the background image, this is a hack
                 element.clientWidth > 200
             );
-        }
+        },
     );
 
     if (elsWithBackgroundImage.length === 0) return [];
@@ -297,7 +305,7 @@ function* getBackgroundImageWarnings(container: HTMLElementWithStyleSheets) {
                         if (element.matches(rule.selectorText)) {
                             styleDict.set(
                                 element,
-                                (styleDict.get(element) || []).concat(rule)
+                                (styleDict.get(element) || []).concat(rule),
                             );
                         }
                     });
@@ -316,17 +324,18 @@ function* getBackgroundImageWarnings(container: HTMLElementWithStyleSheets) {
     const {length} = elements;
 
     for (let index = 0; index < length; index++) {
+        // @ts-ignore
         const [element, styles] = elements[index];
 
         if (styles) {
             const requiresResponsiveWarning = styles.some(
-                (style: string) => !responsiveBackgroundImgRegex.test(style)
+                (style: string) => !responsiveBackgroundImgRegex.test(style),
             );
 
             if (requiresResponsiveWarning) {
                 const bg = getComputedStyle(element).backgroundImage;
                 const source = /url\("(.*)"\)/.test(bg)
-                    ? bg.match(/url\("(.*)"\)/)[1]
+                    ? bg.match(/url\("(.*)"\)/)?.[1]
                     : undefined;
                 result.push({
                     path: getDomPath(element),
@@ -342,7 +351,7 @@ function* getBackgroundImageWarnings(container: HTMLElementWithStyleSheets) {
 
 export const getActiveStyles = (
     container: HTMLElementWithStyleSheets,
-    element: Element
+    element: Element,
 ) => {
     const sheets = container.styleSheets;
     const result: CSSRule[] = [];
@@ -361,7 +370,7 @@ export const getActiveStyles = (
                 // @ts-ignore
                 const ruleNoPseudoClass = rule.selectorText.replace(
                     activeRegex,
-                    ''
+                    '',
                 );
 
                 try {
@@ -380,7 +389,7 @@ export const getActiveStyles = (
 
 function* getActiveWarnings(container: HTMLElementWithStyleSheets) {
     const buttons = getElements(container, 'button').concat(
-        getElements(container, '[role="button"]')
+        getElements(container, '[role="button"]'),
     );
     const links = getElements(container, 'a');
     const elements = buttons.concat(links);
@@ -389,15 +398,17 @@ function* getActiveWarnings(container: HTMLElementWithStyleSheets) {
 
     for (let index = 0; index < length; index++) {
         const element = elements[index];
-        const hasActive = getActiveStyles(container, element);
+        if (element) {
+            const hasActive = getActiveStyles(container, element);
 
-        if (hasActive.length > 0) {
-            result.push({
-                html: element.innerHTML,
-                path: getDomPath(element),
-                text: element.textContent,
-                type: getNodeName(element),
-            });
+            if (hasActive.length > 0) {
+                result.push({
+                    html: element.innerHTML,
+                    path: getDomPath(element),
+                    text: element.textContent,
+                    type: getNodeName(element),
+                });
+            }
         }
         yield index;
     }
@@ -407,7 +418,7 @@ function* getActiveWarnings(container: HTMLElementWithStyleSheets) {
 
 export const getOriginalStyles = (
     container: HTMLElementWithStyleSheets,
-    element: Element
+    element: Element,
 ) => {
     const sheets = container.styleSheets;
     const result: string[] = [];
@@ -438,15 +449,17 @@ function* get100vhWarnings(container: HTMLElementWithStyleSheets) {
 
     for (let index = 0; index < length; index++) {
         const element = elements[index];
-        const styles = getOriginalStyles(container, element);
-        const vhWarning = styles.find((style) => /100vh/.test(style));
+        if (element) {
+            const styles = getOriginalStyles(container, element);
+            const vhWarning = styles.find((style) => /100vh/.test(style));
 
-        if (vhWarning) {
-            result.push({
-                css: vhWarning,
-                el: element,
-                path: getDomPath(element),
-            });
+            if (vhWarning) {
+                result.push({
+                    css: vhWarning,
+                    el: element,
+                    path: getDomPath(element),
+                });
+            }
         }
         yield index;
     }
@@ -465,8 +478,8 @@ const schedule = (iterator: Iterator<unknown, unknown>): Analysis => {
 
 export const getScheduledWarnings = (
     container: HTMLElementWithStyleSheets,
-    setState: Dispatch<SetStateAction<Warnings>>,
-    setComplete: Dispatch<SetStateAction<boolean>>
+    setState: Dispatch<SetStateAction<Warnings | undefined>>,
+    setComplete: Dispatch<SetStateAction<boolean>>,
 ) => {
     const analyses: Record<string, Analysis> = {
         active: schedule(getActiveWarnings(container)),
@@ -480,7 +493,7 @@ export const getScheduledWarnings = (
     let remaining = analysesArray.length;
     analysesArray.forEach((key) => {
         //const start = performance.now()
-        analyses[key].task.then((result) => {
+        analyses[key]?.task.then((result) => {
             //console.log(key, performance.now() - start)
             setState((prev) => ({...prev, [key]: result}));
 
@@ -490,5 +503,5 @@ export const getScheduledWarnings = (
         });
     });
 
-    return () => analysesArray.forEach((key) => analyses[key].abort());
+    return () => analysesArray.forEach((key) => analyses[key]?.abort());
 };

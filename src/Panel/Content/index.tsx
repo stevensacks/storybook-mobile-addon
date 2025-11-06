@@ -1,4 +1,5 @@
-import React, {FC, useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
+import type {FC} from 'react';
 import Hints, {Loading} from './Hints';
 
 type ContentProps = {
@@ -44,7 +45,7 @@ const Content: FC<ContentProps> = ({active, storyId}) => {
 
         timeoutRef.current = window.setTimeout(checkContainer, DELAY);
 
-        return () => clearTimeout(timeoutRef.current);
+        return () => clearTimeout(timeoutRef.current!);
     }, [storyId]);
 
     const container = getContainer();

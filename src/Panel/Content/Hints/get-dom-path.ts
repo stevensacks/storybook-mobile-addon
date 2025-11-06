@@ -13,7 +13,7 @@ const getDomPath = (element: Element) => {
         ) {
             const sib = element.parentNode.childNodes[index];
 
-            if (sib.nodeName === element.nodeName) {
+            if (sib?.nodeName === element.nodeName) {
                 if (sib === element) {
                     sibIndex = sibCount;
                 }
@@ -28,7 +28,7 @@ const getDomPath = (element: Element) => {
             element.tagName !== 'BODY'
         ) {
             stack.unshift(
-                `${element.nodeName.toLowerCase()}.${element.classList.toString()}`
+                `${element.nodeName.toLowerCase()}.${element.classList.toString()}`,
             );
         } else if (sibCount > 1) {
             stack.unshift(`${element.nodeName.toLowerCase()}:eq(${sibIndex})`);

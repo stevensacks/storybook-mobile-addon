@@ -1,7 +1,8 @@
 /* eslint-disable react/no-array-index-key */
-import React, {FC, useEffect, useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
+import type {FC} from 'react';
 import {styled} from 'storybook/theming';
-import {
+import type {
     ActiveWarning,
     AutoCompleteWarning,
     BackgroundImageWarning,

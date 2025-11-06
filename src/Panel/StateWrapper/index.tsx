@@ -1,4 +1,5 @@
-import {cloneElement, FC, ReactElement, useState} from 'react';
+import {cloneElement, useState} from 'react';
+import type {FC, ReactElement} from 'react';
 import {useChannel} from 'storybook/manager-api';
 import {STORY_RENDERED} from 'storybook/internal/core-events';
 
