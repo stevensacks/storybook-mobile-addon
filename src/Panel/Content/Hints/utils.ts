@@ -13,8 +13,13 @@ import type {
     Warnings,
 } from './types';
 
-const getElements = (container: HTMLElementWithStyleSheets, tag: string) =>
-    Array.from(container.querySelectorAll(tag));
+const getElements = (container: HTMLElementWithStyleSheets, tag: string) => {
+    const root = container.querySelector('#storybook-root');
+
+    return Array.from(container.querySelectorAll(tag)).filter(
+        (e) => !root || root.contains(e),
+    );
+};
 
 const getStylesheetRules = (
     sheets: Record<string, CSSStyleSheet>,
@@ -275,22 +280,23 @@ function* getSrcsetWarnings(container: HTMLElementWithStyleSheets) {
 
 function* getBackgroundImageWarnings(container: HTMLElementWithStyleSheets) {
     const backgroundImageRegex = /url\(".*?(.png|.jpg|.jpeg)"\)/;
-    const elsWithBackgroundImage = getElements(container, '#root *').filter(
-        (element) => {
-            const style = getComputedStyle(element);
-            // @ts-ignore
-            const backgroundImageStyle = style['background-image'];
+    const elsWithBackgroundImage = getElements(
+        container,
+        '#storybook-root *',
+    ).filter((element) => {
+        const style = getComputedStyle(element);
+        // @ts-ignore
+        const backgroundImageStyle = style['background-image'];
 
-            return (
-                backgroundImageStyle &&
-                backgroundImageRegex.test(backgroundImageStyle) &&
-                // HACK
-                // ideally, we would make a new image element and check its "naturalWidth"
-                // to get a better idea of the size of the background image, this is a hack
-                element.clientWidth > 200
-            );
-        },
-    );
+        return (
+            backgroundImageStyle &&
+            backgroundImageRegex.test(backgroundImageStyle) &&
+            // HACK
+            // ideally, we would make a new image element and check its "naturalWidth"
+            // to get a better idea of the size of the background image, this is a hack
+            element.clientWidth > 200
+        );
+    });
 
     if (elsWithBackgroundImage.length === 0) return [];
 
@@ -443,7 +449,7 @@ export const getOriginalStyles = (
 };
 
 function* get100vhWarnings(container: HTMLElementWithStyleSheets) {
-    const elements = getElements(container, '#root *');
+    const elements = getElements(container, '#storybook-root *');
     const {length} = elements;
     const result = [];
 

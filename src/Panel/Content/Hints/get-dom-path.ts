@@ -39,7 +39,7 @@ const getDomPath = (element: Element) => {
         element = element.parentNode as Element;
     }
 
-    const toFilter = ['html', 'body', 'div#root'];
+    const toFilter = ['html', 'body', 'div#storybook-root'];
 
     return stack
         .filter((stackElement) => !toFilter.includes(stackElement))
