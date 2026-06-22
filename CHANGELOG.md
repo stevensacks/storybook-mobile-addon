@@ -1,3 +1,15 @@
+# v10.0.2 (Mon Jun 22 2026)
+
+#### 🐛 Bug Fix
+
+- Fix Storybook 10 compatibility [#6](https://github.com/stevensacks/storybook-mobile-addon/pull/6) ([@lesderid](https://github.com/lesderid))
+
+#### Authors: 1
+
+- Les De Ridder ([@lesderid](https://github.com/lesderid))
+
+---
+
 # v4.0.3 (Thu Nov 06 2025)
 
 #### ⚠️ Pushed to `main`
