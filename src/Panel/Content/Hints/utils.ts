@@ -327,7 +327,7 @@ const responsiveBackgroundImgRegex =
     /-webkit-min-device-pixel-ratio|min-resolution|image-set/;
 
 function* getBackgroundImageWarnings(
-    container: HTMLElementWithStyleSheets,
+    rules: SelectorRule[],
     elements: Element[],
 ) {
     const backgroundImageRegex = /url\(".*?(.png|.jpg|.jpeg)"\)/;
@@ -347,7 +347,6 @@ function* getBackgroundImageWarnings(
         );
     });
 
-    const rules = getSelectorRules(container);
     const {length} = elsWithBackgroundImage;
     const result = [];
 
@@ -385,32 +384,22 @@ function* getBackgroundImageWarnings(
 }
 
 // Rules whose selector ends in `:active`, with the pseudo-class stripped so
-// the remainder can be matched against elements directly. Computed once per
-// scan instead of re-scanning every stylesheet for every candidate element.
-const getActiveRules = (container: HTMLElementWithStyleSheets) => {
-    const activeRegex = /:active$/;
-    const result: SelectorRule[] = [];
+// the remainder can be matched against elements directly. Derived from the
+// already-computed `selectorRules` instead of re-scanning every stylesheet.
+const activeRegex = /:active$/;
 
-    forEachRule(container, (rule) => {
-        // @ts-expect-error selectorText is untyped on the base CSSRule type
-        const selectorText = rule.selectorText as string | undefined;
-
-        if (selectorText && activeRegex.test(selectorText)) {
-            result.push({
-                rule,
-                selector: selectorText.replace(activeRegex, ''),
-            });
-        }
-    });
-
-    return result;
-};
+const getActiveRules = (selectorRules: SelectorRule[]) =>
+    selectorRules
+        .filter(({selector}) => activeRegex.test(selector))
+        .map(({rule, selector}) => ({
+            rule,
+            selector: selector.replace(activeRegex, ''),
+        }));
 
 function* getActiveWarnings(
-    container: HTMLElementWithStyleSheets,
+    activeRules: SelectorRule[],
     elements: HTMLElement[],
 ) {
-    const activeRules = getActiveRules(container);
     const {length} = elements;
     const result = [];
 
@@ -437,30 +426,12 @@ function* getActiveWarnings(
     return result;
 }
 
-// Rules whose cssText mentions 100vh, computed once per scan instead of
-// re-collecting every matching rule's cssText for every element under
-// #storybook-root.
-const get100vhRules = (container: HTMLElementWithStyleSheets) => {
-    const result: SelectorRule[] = [];
+// Rules whose cssText mentions 100vh, derived from the already-computed
+// `selectorRules` instead of re-scanning every stylesheet.
+const get100vhRules = (selectorRules: SelectorRule[]) =>
+    selectorRules.filter(({rule}) => /100vh/.test(rule.cssText));
 
-    forEachRule(container, (rule) => {
-        // @ts-expect-error selectorText is untyped on the base CSSRule type
-        const selectorText = rule.selectorText as string | undefined;
-        const cssText = rule.cssText;
-
-        if (selectorText && cssText && /100vh/.test(cssText)) {
-            result.push({rule, selector: selectorText});
-        }
-    });
-
-    return result;
-};
-
-function* get100vhWarnings(
-    container: HTMLElementWithStyleSheets,
-    elements: Element[],
-) {
-    const vhRules = get100vhRules(container);
+function* get100vhWarnings(vhRules: SelectorRule[], elements: Element[]) {
     const {length} = elements;
     const result = [];
 
@@ -502,13 +473,20 @@ export const getScheduledWarnings = (
 ) => {
     const tappableElements = getTappableElements(container);
     const storyElements = getElements(container, '#storybook-root *');
+    // Every stylesheet is walked once here instead of once per analysis:
+    // active/height/backgroundImg all used to re-derive their own rule list
+    // from a full forEachRule scan, tripling the up-front synchronous cost
+    // each of their generators paid before their first yield.
+    const selectorRules = getSelectorRules(container);
+    const activeRules = getActiveRules(selectorRules);
+    const vhRules = get100vhRules(selectorRules);
 
     const analyses: Record<string, Analysis> = {
-        active: schedule(getActiveWarnings(container, tappableElements)),
+        active: schedule(getActiveWarnings(activeRules, tappableElements)),
         backgroundImg: schedule(
-            getBackgroundImageWarnings(container, storyElements),
+            getBackgroundImageWarnings(selectorRules, storyElements),
         ),
-        height: schedule(get100vhWarnings(container, storyElements)),
+        height: schedule(get100vhWarnings(vhRules, storyElements)),
         srcset: schedule(getSrcsetWarnings(container)),
         tapHighlight: schedule(getTapHighlightWarnings(tappableElements)),
         touchTarget: schedule(getTouchTargetSizeWarning(tappableElements)),
