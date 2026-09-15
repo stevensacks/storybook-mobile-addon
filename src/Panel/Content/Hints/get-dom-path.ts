@@ -1,4 +1,3 @@
-/* eslint-disable no-plusplus,no-param-reassign */
 const getDomPath = (element: Element) => {
     const stack = [];
 

@@ -17,7 +17,7 @@ const InvisibleButton = styled.button`
 
 const IconButton = () => (
     <InvisibleButton>
-        {/* @ts-ignore */}
+        {/* @ts-expect-error InfoSignIcon's prop types don't resolve cleanly under React 19 */}
         <InfoSignIcon color="info" />
     </InvisibleButton>
 );

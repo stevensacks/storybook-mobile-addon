@@ -15,8 +15,6 @@ export type SrcsetWarning = {
 
 export type BackgroundImageWarning = SrcsetWarning;
 
-export type ActiveStyleWarning = {};
-
 export type AutoCompleteWarning = {
     labelText: string;
     path: string;
@@ -36,12 +34,6 @@ export type HeightWarning = {
 export type MinSize = {height: number; width: number};
 
 export type SuspectElementTuple = [HTMLElement, DOMRect];
-
-export type SuspectElement = {
-    bounding: MinSize;
-    close: SuspectElementTuple[];
-    el: HTMLElement;
-};
 
 export type DangerZone = {
     bottom: number;

@@ -1,4 +1,3 @@
-/* eslint-disable no-plusplus */
 import type {Dispatch, SetStateAction} from 'react';
 import {createScheduler} from 'lrt';
 import getDomPath from './get-dom-path';
@@ -7,7 +6,6 @@ import type {
     DangerZone,
     HTMLElementWithStyleSheets,
     MinSize,
-    SuspectElement,
     SuspectElementTuple,
     TouchTarget,
     Warnings,
@@ -38,12 +36,48 @@ const getStylesheetRules = (
     return rules;
 };
 
+const forEachRule = (
+    container: HTMLElementWithStyleSheets,
+    callback: (rule: CSSRule) => void,
+) => {
+    const sheets = container.styleSheets;
+
+    Object.keys(sheets).forEach((k) => {
+        getStylesheetRules(sheets, k).forEach((rule) => {
+            if (rule) callback(rule);
+        });
+    });
+};
+
 const getNodeName = (element: Element) =>
     element.nodeName === 'A'
         ? 'a'
         : element.nodeName === 'BUTTON'
           ? 'button'
           : `${element.nodeName.toLowerCase()}[role="button"]`;
+
+// A selector match can throw on some selector syntaxes in Safari; every
+// caller that tests a precomputed selector against a candidate element
+// wants the same "treat a throw as no match" behavior.
+const safeMatches = (element: Element, selector: string) => {
+    try {
+        return element.matches(selector);
+    } catch {
+        return false;
+    }
+};
+
+// button/[role="button"]/a elements are the candidate pool for several
+// analyses below (touch target, tap highlight, active styles); computed
+// once per scan and shared instead of each analysis re-querying the DOM.
+const getTappableElements = (container: HTMLElementWithStyleSheets) =>
+    Array.from(
+        new Set(
+            getElements(container, 'button')
+                .concat(getElements(container, '[role="button"]'))
+                .concat(getElements(container, 'a')),
+        ),
+    ) as HTMLElement[];
 
 const attachLabels = (
     inputs: HTMLInputElement[],
@@ -57,7 +91,9 @@ const attachLabels = (
         } else if (input.parentElement?.nodeName === 'LABEL') {
             labelText = input.parentElement.textContent;
         } else if (input.id) {
-            const label = container.querySelector(`label[for="${input.id}"]`);
+            const label = container.querySelector(
+                `label[for="${CSS.escape(input.id)}"]`,
+            );
             if (label) labelText = label.textContent;
         }
 
@@ -126,23 +162,18 @@ const isInside = (dangerZone: DangerZone, bounding: DOMRect) =>
     bounding.left <= dangerZone.right &&
     bounding.right >= dangerZone.left;
 
-const toTouchTarget = ({
-    bounding: {height, width},
+const toTouchTarget = (
+    element: HTMLElement,
+    bounding: DOMRect,
+    close: SuspectElementTuple[],
+): TouchTarget => ({
     close,
-    el,
-}: SuspectElement): TouchTarget => ({
-    close,
-    height: Math.floor(height),
-    html: el.innerHTML,
-    path: getDomPath(el),
-    text: el.textContent,
-    type:
-        el.nodeName === 'A'
-            ? 'a'
-            : el.nodeName === 'BUTTON'
-              ? 'button'
-              : `${el.nodeName.toLowerCase()}[role="button"]`,
-    width: Math.floor(width),
+    height: Math.floor(bounding.height),
+    html: element.innerHTML,
+    path: getDomPath(element),
+    text: element.textContent,
+    type: getNodeName(element),
+    width: Math.floor(bounding.width),
 });
 
 export const MIN_SIZE = 32;
@@ -153,17 +184,22 @@ export const RECOMMENDED_DISTANCE = 8;
 const checkMinSize = ({height, width}: MinSize) =>
     height < MIN_SIZE || width < MIN_SIZE;
 
-function* getTouchTargetSizeWarning(container: HTMLElementWithStyleSheets) {
-    const elements = getElements(container, 'button')
-        .concat(getElements(container, '[role="button"]'))
-        .concat(getElements(container, 'a')) as HTMLElement[];
-
-    const suspectElements = Array.from(new Set(elements)).map(
-        (element): SuspectElementTuple => [
-            element,
-            element.getBoundingClientRect(),
-        ],
-    );
+function* getTouchTargetSizeWarning(elements: HTMLElement[]) {
+    // elements is already deduped by getTappableElements, so an element
+    // matching more than one selector (e.g. <button role="button">) is
+    // only ever processed once here.
+    //
+    // Neighbor positions are a one-time snapshot, same as before this file
+    // was touched: re-reading every candidate's rect on every iteration to
+    // keep neighbor data fresh would turn this into O(elements) live reads
+    // per element. The element actually being scored each iteration still
+    // gets a fresh getBoundingClientRect() so a mid-scan reflow (an image
+    // finishing loading, a viewport resize) between scheduler chunk
+    // boundaries doesn't score it against stale, scan-start geometry.
+    const snapshot: SuspectElementTuple[] = elements.map((element) => [
+        element,
+        element.getBoundingClientRect(),
+    ]);
 
     const {length} = elements;
     const underMinSize = [];
@@ -171,6 +207,7 @@ function* getTouchTargetSizeWarning(container: HTMLElementWithStyleSheets) {
 
     for (let index = 0; index < length; index++) {
         const element = elements[index];
+
         if (element) {
             const bounding = element.getBoundingClientRect();
 
@@ -181,20 +218,15 @@ function* getTouchTargetSizeWarning(container: HTMLElementWithStyleSheets) {
                 top: bounding.top - RECOMMENDED_DISTANCE,
             };
 
-            const close = suspectElements.filter(
+            const close = snapshot.filter(
                 ([susElement, susBounding]) =>
-                    susElement !== element &&
-                    isInside(dangerZone, susBounding as DOMRect),
+                    susElement !== element && isInside(dangerZone, susBounding),
             );
 
             const isUnderMinSize = checkMinSize(bounding);
 
             if (isUnderMinSize || close.length > 0) {
-                const touchTarget = toTouchTarget({
-                    bounding,
-                    close,
-                    el: element,
-                });
+                const touchTarget = toTouchTarget(element, bounding, close);
 
                 if (isUnderMinSize) {
                     underMinSize.push(touchTarget);
@@ -211,23 +243,19 @@ function* getTouchTargetSizeWarning(container: HTMLElementWithStyleSheets) {
     return {tooClose, underMinSize};
 }
 
-function* getTapHighlightWarnings(container: HTMLElementWithStyleSheets) {
-    const buttons = getElements(container, 'button').concat(
-        getElements(container, '[role="button"]'),
-    );
-    const links = getElements(container, 'a');
-    const elements = buttons.concat(links);
+function* getTapHighlightWarnings(elements: HTMLElement[]) {
     const {length} = elements;
-
     const result = [];
 
     for (let index = 0; index < length; index++) {
-        const element = elements[index] as HTMLElement;
+        const element = elements[index];
 
         if (
-            // @ts-ignore
+            element &&
+            // @ts-expect-error `-webkit-tap-highlight-color` is a vendor-prefixed
+            // property not present on the CSSStyleDeclaration index type
             getComputedStyle(element)['-webkit-tap-highlight-color'] ===
-            'rgba(0, 0, 0, 0)'
+                'rgba(0, 0, 0, 0)'
         ) {
             result.push({
                 html: element.innerHTML,
@@ -278,14 +306,35 @@ function* getSrcsetWarnings(container: HTMLElementWithStyleSheets) {
     return result;
 }
 
-function* getBackgroundImageWarnings(container: HTMLElementWithStyleSheets) {
+type SelectorRule = {rule: CSSRule; selector: string};
+
+// Every rule with a selector, flattened once per scan instead of re-walking
+// every stylesheet for every candidate element.
+const getSelectorRules = (container: HTMLElementWithStyleSheets) => {
+    const result: SelectorRule[] = [];
+
+    forEachRule(container, (rule) => {
+        // @ts-expect-error selectorText is untyped on the base CSSRule type
+        const selectorText = rule.selectorText as string | undefined;
+
+        if (selectorText) result.push({rule, selector: selectorText});
+    });
+
+    return result;
+};
+
+const responsiveBackgroundImgRegex =
+    /-webkit-min-device-pixel-ratio|min-resolution|image-set/;
+
+function* getBackgroundImageWarnings(
+    container: HTMLElementWithStyleSheets,
+    elements: Element[],
+) {
     const backgroundImageRegex = /url\(".*?(.png|.jpg|.jpeg)"\)/;
-    const elsWithBackgroundImage = getElements(
-        container,
-        '#storybook-root *',
-    ).filter((element) => {
+    const elsWithBackgroundImage = elements.filter((element) => {
         const style = getComputedStyle(element);
-        // @ts-ignore
+        // @ts-expect-error kebab-case CSS property access via bracket notation
+        // isn't in the CSSStyleDeclaration index type
         const backgroundImageStyle = style['background-image'];
 
         return (
@@ -298,44 +347,24 @@ function* getBackgroundImageWarnings(container: HTMLElementWithStyleSheets) {
         );
     });
 
-    if (elsWithBackgroundImage.length === 0) return [];
-
-    const styleDict = new Map();
-
-    Object.keys(container.styleSheets).forEach((k) => {
-        getStylesheetRules(container.styleSheets, k).forEach((rule) => {
-            if (rule) {
-                try {
-                    elsWithBackgroundImage.forEach((element) => {
-                        // @ts-ignore
-                        if (element.matches(rule.selectorText)) {
-                            styleDict.set(
-                                element,
-                                (styleDict.get(element) || []).concat(rule),
-                            );
-                        }
-                    });
-                } catch {
-                    // catch errors in safari
-                }
-            }
-        });
-    });
-
-    const responsiveBackgroundImgRegex =
-        /-webkit-min-device-pixel-ratio|min-resolution|image-set/;
-
+    const rules = getSelectorRules(container);
+    const {length} = elsWithBackgroundImage;
     const result = [];
-    const elements = Array.from(styleDict.entries());
-    const {length} = elements;
 
+    // Matching precomputed rules against elements is O(rules) per element;
+    // doing that inside this per-element loop (instead of eagerly for every
+    // candidate element up front) keeps each yielded step bounded to a
+    // single element instead of the whole candidate list at once.
     for (let index = 0; index < length; index++) {
-        // @ts-ignore
-        const [element, styles] = elements[index];
+        const element = elsWithBackgroundImage[index];
 
-        if (styles) {
-            const requiresResponsiveWarning = styles.some(
-                (style: string) => !responsiveBackgroundImgRegex.test(style),
+        if (element) {
+            const matchingRules = rules.filter(({selector}) =>
+                safeMatches(element, selector),
+            );
+
+            const requiresResponsiveWarning = matchingRules.some(
+                ({rule}) => !responsiveBackgroundImgRegex.test(rule.cssText),
             );
 
             if (requiresResponsiveWarning) {
@@ -355,59 +384,45 @@ function* getBackgroundImageWarnings(container: HTMLElementWithStyleSheets) {
     return result;
 }
 
-export const getActiveStyles = (
-    container: HTMLElementWithStyleSheets,
-    element: Element,
-) => {
-    const sheets = container.styleSheets;
-    const result: CSSRule[] = [];
-
+// Rules whose selector ends in `:active`, with the pseudo-class stripped so
+// the remainder can be matched against elements directly. Computed once per
+// scan instead of re-scanning every stylesheet for every candidate element.
+const getActiveRules = (container: HTMLElementWithStyleSheets) => {
     const activeRegex = /:active$/;
+    const result: SelectorRule[] = [];
 
-    Object.keys(sheets).forEach((k) => {
-        getStylesheetRules(sheets, k).forEach((rule) => {
-            if (
-                rule &&
-                // @ts-ignore
-                rule.selectorText &&
-                // @ts-ignore
-                activeRegex.test(rule.selectorText)
-            ) {
-                // @ts-ignore
-                const ruleNoPseudoClass = rule.selectorText.replace(
-                    activeRegex,
-                    '',
-                );
+    forEachRule(container, (rule) => {
+        // @ts-expect-error selectorText is untyped on the base CSSRule type
+        const selectorText = rule.selectorText as string | undefined;
 
-                try {
-                    if (element.matches(ruleNoPseudoClass)) {
-                        result.push(rule);
-                    }
-                } catch {
-                    // safari
-                }
-            }
-        });
+        if (selectorText && activeRegex.test(selectorText)) {
+            result.push({
+                rule,
+                selector: selectorText.replace(activeRegex, ''),
+            });
+        }
     });
 
     return result;
 };
 
-function* getActiveWarnings(container: HTMLElementWithStyleSheets) {
-    const buttons = getElements(container, 'button').concat(
-        getElements(container, '[role="button"]'),
-    );
-    const links = getElements(container, 'a');
-    const elements = buttons.concat(links);
+function* getActiveWarnings(
+    container: HTMLElementWithStyleSheets,
+    elements: HTMLElement[],
+) {
+    const activeRules = getActiveRules(container);
     const {length} = elements;
     const result = [];
 
     for (let index = 0; index < length; index++) {
         const element = elements[index];
-        if (element) {
-            const hasActive = getActiveStyles(container, element);
 
-            if (hasActive.length > 0) {
+        if (element) {
+            const hasActive = activeRules.some(({selector}) =>
+                safeMatches(element, selector),
+            );
+
+            if (hasActive) {
                 result.push({
                     html: element.innerHTML,
                     path: getDomPath(element),
@@ -422,46 +437,44 @@ function* getActiveWarnings(container: HTMLElementWithStyleSheets) {
     return result;
 }
 
-export const getOriginalStyles = (
-    container: HTMLElementWithStyleSheets,
-    element: Element,
-) => {
-    const sheets = container.styleSheets;
-    const result: string[] = [];
+// Rules whose cssText mentions 100vh, computed once per scan instead of
+// re-collecting every matching rule's cssText for every element under
+// #storybook-root.
+const get100vhRules = (container: HTMLElementWithStyleSheets) => {
+    const result: SelectorRule[] = [];
 
-    Object.keys(sheets).forEach((k) => {
-        const rules = getStylesheetRules(sheets, k);
-        rules.forEach((rule) => {
-            if (rule) {
-                try {
-                    // @ts-ignore
-                    if (element.matches(rule.selectorText)) {
-                        result.push(rule.cssText);
-                    }
-                } catch {
-                    // catch errors in safari
-                }
-            }
-        });
+    forEachRule(container, (rule) => {
+        // @ts-expect-error selectorText is untyped on the base CSSRule type
+        const selectorText = rule.selectorText as string | undefined;
+        const cssText = rule.cssText;
+
+        if (selectorText && cssText && /100vh/.test(cssText)) {
+            result.push({rule, selector: selectorText});
+        }
     });
 
     return result;
 };
 
-function* get100vhWarnings(container: HTMLElementWithStyleSheets) {
-    const elements = getElements(container, '#storybook-root *');
+function* get100vhWarnings(
+    container: HTMLElementWithStyleSheets,
+    elements: Element[],
+) {
+    const vhRules = get100vhRules(container);
     const {length} = elements;
     const result = [];
 
     for (let index = 0; index < length; index++) {
         const element = elements[index];
-        if (element) {
-            const styles = getOriginalStyles(container, element);
-            const vhWarning = styles.find((style) => /100vh/.test(style));
 
-            if (vhWarning) {
+        if (element) {
+            const match = vhRules.find(({selector}) =>
+                safeMatches(element, selector),
+            );
+
+            if (match) {
                 result.push({
-                    css: vhWarning,
+                    css: match.rule.cssText,
                     el: element,
                     path: getDomPath(element),
                 });
@@ -487,13 +500,18 @@ export const getScheduledWarnings = (
     setState: Dispatch<SetStateAction<Warnings | undefined>>,
     setComplete: Dispatch<SetStateAction<boolean>>,
 ) => {
+    const tappableElements = getTappableElements(container);
+    const storyElements = getElements(container, '#storybook-root *');
+
     const analyses: Record<string, Analysis> = {
-        active: schedule(getActiveWarnings(container)),
-        backgroundImg: schedule(getBackgroundImageWarnings(container)),
-        height: schedule(get100vhWarnings(container)),
+        active: schedule(getActiveWarnings(container, tappableElements)),
+        backgroundImg: schedule(
+            getBackgroundImageWarnings(container, storyElements),
+        ),
+        height: schedule(get100vhWarnings(container, storyElements)),
         srcset: schedule(getSrcsetWarnings(container)),
-        tapHighlight: schedule(getTapHighlightWarnings(container)),
-        touchTarget: schedule(getTouchTargetSizeWarning(container)),
+        tapHighlight: schedule(getTapHighlightWarnings(tappableElements)),
+        touchTarget: schedule(getTouchTargetSizeWarning(tappableElements)),
     };
     const analysesArray = Object.keys(analyses);
     let remaining = analysesArray.length;
