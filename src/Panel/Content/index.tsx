@@ -13,17 +13,18 @@ const getContainer = () => {
     const iframe = document.querySelector('#storybook-preview-iframe');
     if (!iframe) return null;
 
-    // @ts-ignore
+    // @ts-expect-error querySelector('#storybook-preview-iframe') is typed as
+    // Element, which has no contentDocument
     return iframe.contentDocument;
 };
 
 const Content: FC<ContentProps> = ({active, storyId}) => {
-    const [html, setHTML] = useState(undefined);
+    const [ready, setReady] = useState(false);
     const timeoutRef = useRef<number | null>(null);
 
     useEffect(() => {
-        // clear HTML when storyId changes
-        setHTML(undefined);
+        // reset readiness when storyId changes
+        setReady(false);
 
         const checkContainer = () => {
             const container = getContainer();
@@ -35,7 +36,7 @@ const Content: FC<ContentProps> = ({active, storyId}) => {
             if (!container || !container.body) {
                 timeoutRef.current = window.setTimeout(checkContainer, DELAY);
             } else {
-                setHTML(container.body.innerHTML);
+                setReady(true);
             }
         };
 
@@ -52,7 +53,7 @@ const Content: FC<ContentProps> = ({active, storyId}) => {
 
     if (!active) return null;
 
-    if (!html || !container) {
+    if (!ready || !container) {
         return <Loading />;
     }
 

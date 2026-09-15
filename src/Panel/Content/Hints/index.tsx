@@ -1,4 +1,3 @@
-/* eslint-disable react/no-array-index-key */
 import React, {useEffect, useMemo, useState} from 'react';
 import type {FC} from 'react';
 import {styled} from 'storybook/theming';
@@ -808,7 +807,8 @@ const Hints: FC<HintsProps> = ({container}) => {
         () =>
             warnings
                 ? Object.keys(warnings).reduce((acc, key) => {
-                      // @ts-ignore
+                      // @ts-expect-error indexing Warnings by its own keys isn't
+                      // narrowed to the corresponding value type
                       const current = warnings[key];
                       const count = Array.isArray(current)
                           ? Number(current.length > 0)

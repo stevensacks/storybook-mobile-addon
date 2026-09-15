@@ -19,7 +19,7 @@ const ViewportManager: FC<ViewportManagerProps> = ({active}) => {
             cachedState.current = null;
         } else if (
             active &&
-            // @ts-ignore
+            // @ts-expect-error viewportState from useAddonState isn't typed
             (!viewportState || viewportState.selected === NO_VIEWPORT)
         ) {
             cachedState.current = NO_VIEWPORT;
@@ -27,7 +27,6 @@ const ViewportManager: FC<ViewportManagerProps> = ({active}) => {
                 selected: DEFAULT_VIEWPORT,
             });
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [active]);
 
     return null;
